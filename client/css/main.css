@@ -1,0 +1,87 @@
+/* CSS declarations go here */
+.map-canvas {
+    width: 98%;
+    height:570px;
+    left:15px;
+}
+
+#address {
+    width: 100%;
+}
+
+#conteneur_auth
+{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+#conteneur_status
+{
+    display: flex;
+    
+}
+.el_status:nth-child(1)
+{
+    order: 1;
+    flex-basis: 340px;
+    
+}
+.el_map:nth-child(2)
+{
+    order: 2;
+    flex:1;
+    /*flex-basis: auto;*/
+}
+
+#block_container, #block_zone, #block_course, #block_space
+{
+    display: flex;
+    padding: 0;
+  margin: 2px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+
+#block_space:nth-child(2){
+     flex-basis: 100px;
+}
+
+.onoffswitch {
+    position: relative; width: 45px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    height: 19px; padding: 0; line-height: 19px;
+    border: 2px solid #E3E3E3; border-radius: 19px;
+    background-color: #FFFFFF;
+    transition: background-color 0.3s ease-in;
+}
+.onoffswitch-label:before {
+    content: "";
+    display: block; width: 19px; margin: 0px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 24px;
+    border: 2px solid #E3E3E3; border-radius: 19px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label {
+    background-color: #49E845;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label, .onoffswitch-checkbox:checked + .onoffswitch-label:before {
+   border-color: #49E845;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label:before {
+    right: 0px; 
+}
