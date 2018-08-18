@@ -185,6 +185,14 @@ if (Meteor.isClient) {
                      if (myrobot.status.mowerStatus == 'OK_CHARGING') {
                          text = "Chargé à "+myrobot.status.batteryPercent+" %."+"Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));;
                      }  
+                     
+                     
+                     if (myrobot.status.operatingMode == 'HOME') {
+                         text = "Jusqu'à nouvel ordre";
+                     }  
+                     
+                     
+                     
                     break;
                 case "MOWER_CHARGING":
                     text = "Chargé à "+myrobot.status.batteryPercent+" %."+"Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
