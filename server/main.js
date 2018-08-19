@@ -92,7 +92,7 @@ Meteor.startup(() => {
          
          Get_More : function (_idtoken,_id_mower,_providertoken) {
              
-             var robot={id:undefined}
+             var robot={id:undefined,settings:undefined,timers:undefined}
              //console.log("GET MORE : "+_idtoken+" "+_id_mower+" "+_providertoken)
              //console.log(URL_STATUS+"/mowers/"+_id_mower+"/");
              HTTP.get(URL_STATUS+"/mowers/"+_id_mower+"/", {
@@ -122,7 +122,98 @@ Meteor.startup(() => {
                 }
              }
              
-             return robot;
-         }
+             
+            HTTP.get(URL_STATUS+"/mowers/"+_id_mower+"/settings", {
+                data:{},
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer '+_idtoken,
+                    'Authorization-Provider':_providertoken,
+                },
+             }, function( error, response ) {
+                if ( error ) {
+                    console.log( error );
+                } else {
+                    //console.log((response.data));
+                    robot.settings=response.data.settings;  
+                }
+             });
+             
+             var timeout=0;
+             while (robot.settings==undefined){
+                Meteor._sleepForMs(100); 
+                timeout =timeout+ 100;
+                if (timeout==15000){
+                    console.log("timeout")
+                    break;
+                }
+             }
+             
+             HTTP.get(URL_STATUS+"/mowers/"+_id_mower+"/timers", {
+                data:{},
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer '+_idtoken,
+                    'Authorization-Provider':_providertoken,
+                },
+             }, function( error, response ) {
+                if ( error ) {
+                    console.log( error );
+                } else {
+                    //console.log((response.data));
+                    robot.timers=response.data.timers;  
+                }
+             });
+             
+             var timeout=0;
+             while (robot.timers==undefined){
+                Meteor._sleepForMs(100); 
+                timeout =timeout+ 100;
+                if (timeout==15000){
+                    console.log("timeout")
+                    break;
+                }
+             }
+             
+             
+            return robot;
+         },
+         
+         Post_Control : function (_idtoken, _providertoken,_idmower,_state){
+             
+             var retour=""
+             HTTP.post(URL_STATUS+"/mowers/"+_idmower+"/control", {
+                data:{action:_state},
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer '+_idtoken,
+                    'Authorization-Provider':_providertoken,
+                },
+             }, function( error, response ) {
+                if ( error ) {
+                    console.log( error );
+                } else {
+                    console.log((response.data));
+                    retour=response.data;  
+                }
+             });
+             
+             var timeout=0;
+             while (retour.status==undefined){
+                Meteor._sleepForMs(100); 
+                timeout =timeout+ 100;
+                if (timeout==15000){
+                    console.log("timeout")
+                    break;
+                }
+             }
+             
+             return retour.status;
+         }, 
+         
+    
      });
 });

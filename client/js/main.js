@@ -6,9 +6,7 @@ import '/config/config.js'
 
 if (Meteor.isClient) {
     
-    var myrobot={};
-    var MAP_ZOOM  = 18;
-    
+    var myrobot={};    
     var idToken, idProvider, idMower, expiredToken="";
     
     var tmpl, zone, course, geoloc="";
@@ -22,6 +20,8 @@ if (Meteor.isClient) {
     Session.setDefault('LastLat', "");
     Session.setDefault('LastLng', "");
     
+    
+    // Actualisation des données Husqvarna
     Meteor.setInterval(function(){
         
         if (Session.get('LOGIN')) {
@@ -94,6 +94,7 @@ if (Meteor.isClient) {
                                          }else{
                                              Session.set('myrobot', resultM );
                                              Draw_Geoloc(tmpl);
+                                             tmpl.newMap2.setZoom(16)
                                          }
                                     });
                                 }
@@ -117,51 +118,85 @@ if (Meteor.isClient) {
             return Session.get('LOGIN')
         },
         
+        iscutting : function(){
+          
+            myrobot=Session.get("myrobot")
+            if(myrobot.status.mowerStatus == "OK_CUTTING") {
+                return true
+            }else{
+                return false
+            }
+            
+        },
+        
         name:function(){
             myrobot=Session.get("myrobot")
             return myrobot.name;
         },
         id:function(){
-           myrobot=Session.get("myrobot")
-           return myrobot.id;
+            myrobot=Session.get("myrobot")
+            return myrobot.id;
         },
         battery:function(){
             myrobot=Session.get("myrobot")
-           return myrobot.status.batteryPercent;
+            Progress_Bar_Color();
+            return myrobot.status.batteryPercent;
         },
         connected:function(){
             myrobot=Session.get("myrobot")
-            if (myrobot.status.connected)
-                return "Oui"
-            else
-                return "Non"
+            if (myrobot.status.connected){
+                return true
+            }
+            else{
+                return false
+            }
         },
         state:function(){
             
             myrobot=Session.get("myrobot")
-            
+            $(".progress").removeClass("progress-striped active");
+
             switch (myrobot.status.mowerStatus) {
                 case "PARKED_AUTOTIMER":
-                    text = "Stationnée";
+                    text = "Stationné";
                     break;
                 case "OK_CUTTING":
                     text = "Tonte";
                     break;
                 case "OK_CHARGING":
+                    $(".progress").addClass("progress-striped active");
+
                     text = "En Charge";
                     break;
-                case "OK_CUTTING":
-                    text = "Tonte";
-                    break;
+                
                 case "OK_SEARCHING":
                     text = "En direction de la station de charge."
                     break;
+                case "OK_LEAVING":
+                    text = "Retrait de la station de charge."
+                    break;
+   
                 case "PAUSED" : 
                     text="En Pause"
                     break;
                 case "PARKED_PARKED_SELECTED" : 
-                    text="Stationnée"
+                    text="Stationné"
                     break;
+                case "OFF_HATCH_OPEN" : 
+                    text="Arrêté"
+                    break;
+                case "OFF_HATCH_CLOSED_DISABLED" : 
+                    text="Arrêté"
+                    break;
+                    
+                case "ERROR" :
+                    text = "Erreur détectée"
+                    break;
+                    
+                case "ERROR_AT_POWER_UP" :
+                    text = "Erreur au démarrage"
+                    break;
+                    
                 default:
                     text = myrobot.status.mowerStatus;
                     break;
@@ -175,49 +210,281 @@ if (Meteor.isClient) {
             
              switch (myrobot.status.nextStartSource) {
                 case "COMPLETED_CUTTING_TODAY_AUTO":
-                    text = "Minuterie adaptative (météo)."+"Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
+                    text = "Minuterie adaptative (météo)."
+                    if (parseInt(myrobot.status.nextStartTimestamp)>0) {
+                            text+="Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
+                    } 
                     break;
+                     
                 case "NO_SOURCE":
-                      if (myrobot.status.mowerStatus == 'OK_CUTTING') {
-                         text="Fin de la session de tonte à "+myrobot.status.nextStartTimestamp
-                     }                
-
-                     if (myrobot.status.mowerStatus == 'OK_CHARGING') {
-                         text = "Chargé à "+myrobot.status.batteryPercent+" %."+"Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));;
-                     }  
                      
-                     
-                     if (myrobot.status.operatingMode == 'HOME') {
-                         text = "Jusqu'à nouvel ordre";
-                     }  
-                     
-                     
-                     
+                    switch (myrobot.status.mowerStatus) {
+                             
+                        case "OK_CUTTING":
+                            text="En cours..."
+                            if (parseInt(myrobot.status.nextStartTimestamp)>0) {
+                                text+="Fin de la session de tonte à "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
+                            }
+                            break;
+                             
+                        case "OK_CHARGING" : 
+                            text = "Chargé à "+myrobot.status.batteryPercent+"%. "
+                            if (parseInt(myrobot.status.nextStartTimestamp)>0) {
+                                text+="Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));;
+                            }   
+                            break;
+                         
+                        case "HOME" : 
+                            text = "Jusqu'à nouvel ordre";
+                            break;
+                        
+                        case "OK_LEAVING" :
+                             text = "";
+                             break;
+                             
+                        case "OFF_HATCH_CLOSED_DISABLED" :
+                             text = "Action manuelle requise"
+                             
+                        default:
+                            text="";
+                            break;
+                    } 
+                    
                     break;
+                     
                 case "MOWER_CHARGING":
-                    text = "Chargé à "+myrobot.status.batteryPercent+" %."+"Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
+                    text = "Chargé à "+myrobot.status.batteryPercent+"%. "
+                    if (parseInt(myrobot.status.nextStartTimestamp)>0) {
+                        text+="Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));;
+                     } 
                     break;
                      
                 case "COUNTDOWN_TIMER" :
-                     text = "Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
+                    
+                     if (myrobot.status.mowerStatus=="OFF_HATCH_OPEN"){
+                         text="Demande de code PIN."
+                     }
+                     
+                     if (myrobot.status.mowerStatus== "PARKED_AUTOTIMER" || myrobot.status.mowerStatus=="PARKED_PARKED_SELECTED"){
+                         if (parseInt(myrobot.status.nextStartTimestamp)>0) {
+                            text+="Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));;
+                         } 
+                     }
+            
+                     if (myrobot.status.mowerStatus=="OK_SEARCHING")
+                         text="Recherche de la station de charge."
+                     
                      break;
                      
                 case "OK_SEARCHING" :
+                     if (myrobot.status.mowerStatus=="OFF_HATCH_OPEN")
+                         text="Recherche de la station de charge."
+                     
                     break;
                      
                  default:
                     text = myrobot.status.nextStartSource;
                     break;         
-            }
-                    
+            }    
+            
             return text
             
         },
         time:function(){
             myrobot=Session.get("myrobot")
            return ConvertTimpestamp((myrobot.status.storedTimestamp)/1000);
-        }
+        },
+        error:function(){
+            myrobot=Session.get("myrobot")
+            switch (myrobot.status.lastErrorCode) {
+                
+//Your mower has status: ERROR Code: 01 => A l'extérieur de la zone
+//Your mower has status: ERROR Code: 02 => Coupure fil périphérique
+//Your mower has status: ERROR Code: 10 => A l'envers
+//Your mower has status: ERROR Code: 13 => Robot bloqué (Erreur de propulsion)
+//Your mower has status: ERROR Code: 15 => Robot soulevé
+//Your mower has status: ERROR Code: 25 => Disque de coupe bloqué
+//Your mower has status: ERROR Code: 69 => Arrêt manuel de l'interrupteur
+//Your mower has status: ERROR Code: 74 => En dehors de la zone de protection virtuelle 
+                    
+                    
+                case 19: 
+                    text="Problème sur capteur frontal" 
+                    break;
+                case 18: 
+                    text="Problème sur capteur arrière"
+                    break;
+                case 15: 
+                    text="Robot levé"
+                    break;
+                case 10: 
+                    text="Robot renversé"
+                    break;
+                case 2: 
+                    text="Batterie déchargée"
+                    break;
+                case 1: 
+                    text="Robot à l'extérieur de la zone de surveillance"
+                    break;       
+                case 0:
+                    text="Aucune erreur"
+                    break;
+                    
+                default:
+                    text=myrobot.status.lastErrorCode
+                    break;
+            }
+            if (parseInt(myrobot.status.lastErrorCodeTimestamp)>0) {
+                text+="le "+ConvertTimpestampLocale((myrobot.status.lastErrorCodeTimestamp));
+            }
+            return text;
+            
+        },
+        coupemm:function(){
+            myrobot=Session.get("myrobot")
+            for (i=0;i<myrobot.settings.length;i++){
+                
+                if(myrobot.settings[i].id == "cuttingHeight"){
+                    return myrobot.settings[i].value+"mm";
+                }
+            }
+        },
+        spirale:function(){
+            myrobot=Session.get("myrobot")
+            for (i=0;i<myrobot.settings.length;i++){
+                
+                if(myrobot.settings[i].id == "general.runSpiralCutting"){
+                    
+                    if(myrobot.settings[i].value){
+                        
+                        for (j=0;j<myrobot.settings.length;j++){
+                            if(myrobot.settings[j].id == "general.spiralCuttingIntensity"){
+                                
+                                switch (myrobot.settings[j].value) {
+                                    case 1 : 
+                                        intensity="(Très basse)"
+                                        break;
+                                    case 2 : 
+                                        intensity="(Basse)"
+                                        break;
+                                    case 3 : 
+                                        intensity="(Moyenne)"
+                                        break;
+                                    case 4 : 
+                                        intensity = "(Haute)"
+                                        break;
+                                    case 5:
+                                        intensity="(Très Haute)"
+                                        break;
+                                }
+                            }
+                        }
+                
+                        return "Oui "+intensity}
+                    else{
+                        return "Non"}
+                }
+            }
+        },
+        meteo:function(){
+            myrobot=Session.get("myrobot")
+            for (i=0;i<myrobot.settings.length;i++){
+                
+                if(myrobot.settings[i].id == "weatherTimer.runWeatherTimer"){
+                   
+                    if(myrobot.settings[i].value){
+                        return "Oui"}
+                    else{
+                        return "Non"}
+                }
+            }
+        },
+        ecomode:function(){
+            myrobot=Session.get("myrobot")
+            for (i=0;i<myrobot.settings.length;i++){
+                
+                if(myrobot.settings[i].id == "general.runEcoMode"){
+                   
+                    if(myrobot.settings[i].value){
+                        return "Oui"}
+                    else{
+                        return "Non"}
+                }
+            }
+        },
         
+    });
+    
+    Template.robot_status.events({
+       
+        'click #status-tab' :function(evt){
+            
+            evt.preventDefault();
+            
+            var mapelmt = document.getElementById("el_map");
+            mapelmt.style.visibility="visible";
+            var tabselmt = document.getElementById("conteneur_status");
+            tabselmt.style.display="flex";
+        },
+         'click #controle-tab' :function(evt){
+            
+            evt.preventDefault();
+            
+            var mapelmt = document.getElementById("el_map");
+            mapelmt.style.visibility="visible";
+            var tabselmt = document.getElementById("conteneur_status");
+            tabselmt.style.display="flex";
+        },
+         'click #version-tab' :function(evt){
+            
+            evt.preventDefault();
+            
+            var mapelmt = document.getElementById("el_map");
+            mapelmt.style.visibility="visible";
+            var tabselmt = document.getElementById("conteneur_status");
+            tabselmt.style.display="flex";
+        },
+        'click #stats-tab' :function(evt){
+            
+            evt.preventDefault();
+            var mapelmt = document.getElementById("el_map");
+            mapelmt.style.visibility="hidden";
+            var tabselmt = document.getElementById("conteneur_status");
+            tabselmt.style.display="absolute";
+        },
+        
+        'click #stopstart' :function(evt){
+            evt.preventDefault();
+            
+            var state=document.getElementById("stopstart").value;
+            if (state == "Pause"){
+                state="STOP"  
+            }else{
+                state="START"
+            }
+            
+            Meteor.call('Post_Control',idToken, idProvider, idMower,state,
+                function(error, result){
+                    if(error){
+                        alert('Error post');
+                    }else{
+                        alert("Retour du serveur: "+result)
+                    }
+            })
+        },
+       'click #park' :function(evt){
+            evt.preventDefault();
+     
+            Meteor.call('Post_Control',idToken, idProvider, idMower,"PARK",
+                function(error, result){
+                    if(error){
+                        alert('Error post');
+                    }else{
+                        alert("Retour du serveur: "+result)
+                    }
+            })
+        }
+
     });
     
     Template.map.helpers({
@@ -269,6 +536,25 @@ if (Meteor.isClient) {
             Draw_Course(tmpl)
         }
     });
+    
+    function Progress_Bar_Color(){
+        
+        if (parseInt(myrobot.status.batteryPercent) > 70) {
+             $("#progress").removeClass("progress-bar-warning");
+             $("#progress").removeClass("progress-bar-danger");
+             $("#progress").addClass("progress-bar-success");
+            }
+        if (parseInt(myrobot.status.batteryPercent) <= 70 && parseInt(myrobot.status.batteryPercent) > 30 ){
+             $("#progress").removeClass("progress-bar-warning");
+             $("#progress").removeClass("progress-bar-danger");
+             $("#progress").addClass("progress-bar-warning");
+        }
+        if (parseInt(myrobot.status.batteryPercent) <= 30) {
+             $("#progress").removeClass("progress-bar-warning");
+             $("#progress").removeClass("progress-bar-success");
+             $("#progress").addClass("progress-bar-danger");
+        }
+    }
     
     function Draw_Circle_Zone (tmpl) {
 
@@ -418,7 +704,15 @@ if (Meteor.isClient) {
     
     Meteor.startup(function() {
         
+        
+        $(".list-container").css("max-height",$(".map-canvas").height()+50)
 
+        
+        
+        if (Session.get('LOGIN')) {
+            Progress_Bar_Color();
+        }
+        
     });
 
     function ConvertTimpestamp(timestamp){

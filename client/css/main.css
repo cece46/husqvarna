@@ -1,13 +1,28 @@
 /* CSS declarations go here */
 .map-canvas {
-    width: 98%;
+    width: 97%;
     height:570px;
     left:15px;
 }
 
+/*
 #address {
     width: 100%;
 }
+*/
+/*
+.flex-container-v {
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flexbox;
+  display: -ms-flex;
+  display: flex;
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+*/
 
 #conteneur_auth
 {
@@ -18,33 +33,71 @@
 
 }
 
+.flex-fixed {
+  -webkit-flex: 0 0 auto;
+  -moz-flex: 0 0 auto;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
+.flex-fill {
+  -webkit-flex: 0 1 auto;
+  -moz-flex: 0 1 auto;
+  -ms-flex: 0 1 auto;
+  flex: 0 1 auto;
+}
+
+.list-container {
+    overflow-y: scroll;
+    max-height: 500px
+
+}
+
+
+.progress {
+    margin-bottom: 0;
+}
+
+
 #conteneur_status
 {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: -ms-flex;
     display: flex;
+
     
 }
 .el_status:nth-child(1)
 {
     order: 1;
-    flex-basis: 340px;
-    
+    flex-basis: 25%;
+    -webkit-flex-direction: column;
+    -moz-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+
 }
 .el_map:nth-child(2)
 {
     order: 2;
     flex:1;
-    /*flex-basis: auto;*/
 }
 
 #block_container, #block_zone, #block_course, #block_space
 {
     display: flex;
     padding: 0;
-  margin: 2px;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    margin: 4px;
+    list-style: none;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flexbox;
+    display: -ms-flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 }
 
@@ -52,7 +105,6 @@
 #block_space:nth-child(2){
      flex-basis: 100px;
 }
-
 .onoffswitch {
     position: relative; width: 45px;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;

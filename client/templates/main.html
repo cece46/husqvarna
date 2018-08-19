@@ -2,6 +2,9 @@
 <head>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -14,9 +17,7 @@
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-    
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>    
     
     <title>Husqvarna Connect</title>
 </head>
@@ -26,9 +27,9 @@
         <div class="el_auth">{{> authentification}}</div>
     </div>
     
-    <div id="conteneur_status">
-        <div class="el_status">{{> robot_status}}</div>
-        <div class="el_map">{{> map}}</div>
+    <div id="conteneur_status" class="flex-container-v">
+        <div id="el_status" class="flex-fixed el_status">{{> robot_status}}</div>
+        <div id="el_map" class="el_map">{{> map}}</div>
     </div>
     
 </body>
@@ -50,51 +51,157 @@
 </template>
 
 <template name="robot_status">
-     {{#if isLogged}}
-        <h2> Status</h2>
-        <div class="table-responsive">
-          <table class="table">
-            <tbody>
-              <tr class="active">
-                <td>Nom:</td>
-                <td>{{name}}</td>
-              </tr>
-              <tr>
-                <td>ID:</td>
-                <td>{{id}}</td>
-              </tr>
-              <tr>
-                <td>Batterie:</td>
-                <td>{{battery}} %</td>
-              </tr>
-              <tr>
-                <td>Connecté:</td>
-                  <td><span class="label label-success">{{connected}}</span></td>
-              </tr>
-              <tr>
-                <td>Etat:</td>
-                  <td>{{state}}</td>
-              </tr>
-              <tr>
-                <td>Info:</td>
-                  <td>{{info}}</td>
-              </tr>
-              <tr>
-                <td>Heure:</td>
-                  <td>{{time}}</td>
-              </tr>
-            </tbody>
-          </table>
+    
+    {{#if isLogged}}
+    <div class="flex-fill list-container">
+        
+     <ul class="nav nav-tabs" id=myTabs role=tablist> 
+         <li role=presentation class=active>
+             <a href=#status id=status-tab role=tab data-toggle=tab aria-controls=status aria-expanded=true>Status</a>
+         </li> 
+         <li role=presentation>
+             <a href=#controle role=tab id=controle-tab data-toggle=tab aria-controls=controle>Contrôles</a>
+         </li>
+         <li role=presentation>
+             <a href=#stats role=tab id=stats-tab data-toggle=tab aria-controls=stats>Stats</a>
+         </li> 
+         <li role=presentation>
+             <a href=#version role=tab id=version-tab data-toggle=tab aria-controls=version>?</a>
+         </li> 
+    </ul> 
+    
+    <div class=tab-content id=myTabContent> 
+        
+        <div class="tab-pane fade in active" role="tabpanel" id="status" aria-labelledby="status-tab"> 
+             <div class="table-responsive">
+              <table class="table">
+                <tbody>
+                  <tr class="active">
+                      <td><span class="glyphicon glyphicon-star"></span> Nom: </td>
+                    <td>{{name}}</td>
+                  </tr>
+                  <tr>
+                    <td> <i class="fa fa-user-circle-o"></i> ID:</td>
+                    <td>{{id}}</td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa fa-battery-4"></i> Batterie:</td>
+                    <td>
+                        <div class="progress">
+                            <div id="progress" class="progress-bar " role="progressbar" aria-valuenow="{{battery}}"
+  aria-valuemin="0" aria-valuemax="100" style="width:{{battery}}%">{{battery}}%</div>
+                        </div> 
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="glyphicon glyphicon-globe"></span> Connecté: </td>
+                      {{#if connected}}
+                      <td> <span class="label label-success"> Oui</span></td>
+                      {{else}}
+                      <td> <span class="label label-danger"> Non</span></td>
+                      {{/if}}
+                  </tr>
+                  <tr>
+                      <td><span class="glyphicon glyphicon-check"> </span> Etat:</td>
+                      <td>{{state}}</td>
+                  </tr>
+                  <tr>
+                    <td> <span class="glyphicon glyphicon-info-sign"></span> Info:</td>
+                      <td>{{info}}</td>
+                  </tr>
+                  <tr>
+                    <td><span class="glyphicon glyphicon-hourglass"></span> Dernière remontée:</td>
+                      <td>{{time}}</td>
+                  </tr>
+                  <tr>
+                    <td><span class="glyphicon glyphicon-exclamation-sign"></span> Dernière erreur:</td>
+                      <td>{{error}}</td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa fa-cut"></i> Coupe :</td>
+                      <td>{{coupemm}}</td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa fa-rotate-right"></i> Tonte spirale:</td>
+                      <td>{{spirale}}</td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa fa-cloud"></i> Minuterie adaptative:</td>
+                      <td>{{meteo}}</td>
+                  </tr>
+                  <tr>
+                    <td><i class="fa fa-leaf"></i> Mode éco:</td>
+                      <td>{{ecomode}}</td>
+                  </tr>
+                    
+                </tbody>
+              </table>
+            </div>
+        </div> 
+        
+        <div class="tab-pane fade" role=tabpanel id=controle aria-labelledby=controle-tab> 
+            <div class="table-responsive">
+            <table class="table">
+                <tbody><center>
+                    <tr class="active">
+                        <td><button class="btn btn-lg btn-default" id="park">Stationnement</button> </td>
+                    </tr>
+                    <tr>
+                        {{#if iscutting}}
+                        <td><button class="btn btn-lg btn-default" id="stopstart">Pause</button></td>
+                        {{else}}
+                        <td><button class="btn btn-lg btn-default" id="stopstart">Démarrage</button></td>
+                        {{/if}}
+                    </tr></center>
+
+                </tbody>
+            </table>
+            </div>
         </div>
-     
-    {{/if}}
+        
+        <div class="tab-pane fade" role=tabpanel id=stats aria-labelledby=stats-tab> 
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                        <tr class="active">
+                            <td>à faire</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+         
+        <div class="tab-pane fade" role=tabpanel id=version aria-labelledby=version-tab> 
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                        <tr class="active">
+                            <td>Version 0.2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div> 
+        
+     </div> 
+    
+    
+    </div>
+           
+       
 
+    <!--<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOfmgOIeaeK7co6IJMr_Mbjf6WOOfpp7ZankpkWBrEDyzkt8fK">
+      -->  
+{{/if}}
+       
 
+    
 </template>
 
 <template name="map">
     {{#if isLogged}}
-        <div class="map row">
+        <div id="mapcontainer" class="map row">
             {{> mapCanvas2}}
         </div>
     {{/if}}
