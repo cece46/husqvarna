@@ -20,7 +20,6 @@ if (Meteor.isClient) {
     Session.setDefault('LastLat', "");
     Session.setDefault('LastLng', "");
     
-    
     // Actualisation des données Husqvarna
     Meteor.setInterval(function(){
         
@@ -210,10 +209,16 @@ if (Meteor.isClient) {
             
              switch (myrobot.status.nextStartSource) {
                 case "COMPLETED_CUTTING_TODAY_AUTO":
-                    text = "Minuterie adaptative (météo)."
+                    text = "Minuterie adaptative (météo). "
                     if (parseInt(myrobot.status.nextStartTimestamp)>0) {
                             text+="Prochain démarrage le "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
-                    } 
+                    }
+                     
+                     if(myrobot.status.mowerStatus=="PARKED_PARKED_SELECTED") {
+                          text = "Jusqu'à nouvel ordre. ";
+                     } 
+                           
+                            
                     break;
                      
                 case "NO_SOURCE":
@@ -221,7 +226,7 @@ if (Meteor.isClient) {
                     switch (myrobot.status.mowerStatus) {
                              
                         case "OK_CUTTING":
-                            text="En cours..."
+                            text="En cours... "
                             if (parseInt(myrobot.status.nextStartTimestamp)>0) {
                                 text+="Fin de la session de tonte à "+ConvertTimpestampLocale((myrobot.status.nextStartTimestamp));
                             }
@@ -235,7 +240,7 @@ if (Meteor.isClient) {
                             break;
                          
                         case "HOME" : 
-                            text = "Jusqu'à nouvel ordre";
+                            text = "Jusqu'à nouvel ordre. ";
                             break;
                         
                         case "OK_LEAVING" :
@@ -243,7 +248,7 @@ if (Meteor.isClient) {
                              break;
                              
                         case "OFF_HATCH_CLOSED_DISABLED" :
-                             text = "Action manuelle requise"
+                             text = "Action manuelle requise. "
                              
                         default:
                             text="";
@@ -262,7 +267,7 @@ if (Meteor.isClient) {
                 case "COUNTDOWN_TIMER" :
                     
                      if (myrobot.status.mowerStatus=="OFF_HATCH_OPEN"){
-                         text="Demande de code PIN."
+                         text="Demande de code PIN. "
                      }
                      
                      if (myrobot.status.mowerStatus== "PARKED_AUTOTIMER" || myrobot.status.mowerStatus=="PARKED_PARKED_SELECTED"){
@@ -272,13 +277,13 @@ if (Meteor.isClient) {
                      }
             
                      if (myrobot.status.mowerStatus=="OK_SEARCHING")
-                         text="Recherche de la station de charge."
+                         text="Recherche de la station de charge. "
                      
                      break;
                      
                 case "OK_SEARCHING" :
                      if (myrobot.status.mowerStatus=="OFF_HATCH_OPEN")
-                         text="Recherche de la station de charge."
+                         text="Recherche de la station de charge. "
                      
                     break;
                      
@@ -413,6 +418,28 @@ if (Meteor.isClient) {
             }
         },
         
+        /* onglet stat */
+        
+        km_tonte:function(){
+            
+            myrobot=Session.get("myrobot")
+            var path=[];
+            var i=0;
+            for(i=0;i<((myrobot.status.lastLocations).length);i++){
+
+                var sub = [myrobot.status.lastLocations[i]["latitude"],myrobot.status.lastLocations[i]["longitude"]]
+                path.push(sub);
+
+            }
+            
+            var distance=0;
+            for(i=0;i<path.length;i=i+2){
+                distance+=parseFloat(distanceFrom(path[i],path[i+1]))
+
+            }
+            return distance.toFixed(3)+' km /'+(myrobot.status.lastLocations).length
+        }
+        
     });
     
     Template.robot_status.events({
@@ -462,27 +489,29 @@ if (Meteor.isClient) {
             }else{
                 state="START"
             }
-            
-            Meteor.call('Post_Control',idToken, idProvider, idMower,state,
-                function(error, result){
-                    if(error){
-                        alert('Error post');
-                    }else{
-                        alert("Retour du serveur: "+result)
-                    }
-            })
+            if (confirm('Voulez-vous envoyer la commande '+state+'?')) {
+                Meteor.call('Post_Control',idToken, idProvider, idMower,state,
+                    function(error, result){
+                        if(error){
+                            alert('Error post');
+                        }else{
+                            alert("Retour du serveur: "+result)
+                        }
+                })
+            } 
         },
-       'click #park' :function(evt){
+        'click #park' :function(evt){
             evt.preventDefault();
-     
-            Meteor.call('Post_Control',idToken, idProvider, idMower,"PARK",
-                function(error, result){
-                    if(error){
-                        alert('Error post');
-                    }else{
-                        alert("Retour du serveur: "+result)
-                    }
-            })
+            if (confirm('Voulez-vous envoyer la commande '+"PARK"+'?')) {               
+                Meteor.call('Post_Control',idToken, idProvider, idMower,"PARK",
+                    function(error, result){
+                        if(error){
+                            alert('Error post');
+                        }else{
+                            alert("Retour du serveur: "+result)
+                        }
+                })
+            }
         }
 
     });
@@ -619,7 +648,7 @@ if (Meteor.isClient) {
                 path.push(sub);
 
             }
-    
+            
             if (course != undefined)
                 course.setMap(null)
             
@@ -629,7 +658,7 @@ if (Meteor.isClient) {
               strokeOpacity: 0.6,
               strokeWeight: 6
             });
-                  
+                      
             tmpl.newMap2.setCenter(myrobot.status.lastLocations[0]["latitude"], myrobot.status.lastLocations[0]["longitude"]);   
             tmpl.newMap2.setZoom(tmpl.newMap2.getZoom())
         }
@@ -647,8 +676,8 @@ if (Meteor.isClient) {
    
           tmpl.newMap2 = new tmpl.mapEngine({
             div: '#map-canvas2',
-            lat: 46.50789,
-            lng: 4.03854,
+            lat: 46.50789,  //FRANCE
+            lng: 4.03854,   // FRANCE
             zoom: 6,
             mapTypeControlOptions: {
                 mapTypeIds : ["hybrid", "roadmap", "satellite", "terrain", "osm"]
@@ -663,8 +692,13 @@ if (Meteor.isClient) {
               name: "OpenStreetMap",
               maxZoom: 18
           });
+          //tmpl.setMapTypeId("osm");
+
       
         });
+        
+        $(".list-container").css("max-height",$(".map-canvas").height()+'px')
+
 
     };
 
@@ -703,12 +737,7 @@ if (Meteor.isClient) {
     });
     
     Meteor.startup(function() {
-        
-        
-        $(".list-container").css("max-height",$(".map-canvas").height()+50)
-
-        
-        
+                
         if (Session.get('LOGIN')) {
             Progress_Bar_Color();
         }
@@ -725,6 +754,25 @@ if (Meteor.isClient) {
 
         var d = new Date(timestamp * 1000)	// Convert the passed timestamp to milliseconds
         return d.toLocaleString('fr-FR', { timeZone: 'UTC' });
+    }
+
+    function distanceFrom(points1,points2) {
+        var lat1 = points1[0];
+        var radianLat1 = lat1 * (Math.PI / 180);
+        var lng1 = points1[1];
+        var radianLng1 = lng1 * (Math.PI / 180);
+        var lat2 = points2[0];
+        var radianLat2 = lat2 * (Math.PI / 180);
+        var lng2 = points2[1];
+        var radianLng2 = lng2 * (Math.PI / 180);
+        var earth_radius = 6371; // 6371 for kilometers
+        var diffLat = (radianLat1 - radianLat2);
+        var diffLng = (radianLng1 - radianLng2);
+        var sinLat = Math.sin(diffLat / 2);
+        var sinLng = Math.sin(diffLng / 2);
+        var a = Math.pow(sinLat, 2.0) + Math.cos(radianLat1) * Math.cos(radianLat2) * Math.pow(sinLng, 2.0);
+        var distance = earth_radius * 2 * Math.asin(Math.min(1, Math.sqrt(a)));
+        return distance.toFixed(3); //km
     }
 
     
