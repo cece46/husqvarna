@@ -25,7 +25,7 @@
     <title>Husqvarna Connect</title>
 </head>
 
-<body>
+<body >
     <div id="Cconteneur_auth">
         <div class="el_auth">{{> authentification}}</div>
     </div>
@@ -39,8 +39,10 @@
 
 <template name="authentification">
     {{#if isLogged}}
+        
     {{else}}
         <div id="conteneur_auth">
+            
             <form class="form">
             <label for="inputEmail" class="sr-only">Email address</label>
             <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
@@ -65,9 +67,7 @@
          <li role=presentation>
              <a href=#controle role=tab id=controle-tab data-toggle=tab aria-controls=controle>Contrôles</a>
          </li>
-         <li role=presentation>
-             <a href=#stats role=tab id=stats-tab data-toggle=tab aria-controls=stats>Stats</a>
-         </li> 
+
          <li role=presentation>
              <a href=#version role=tab id=version-tab data-toggle=tab aria-controls=version>?</a>
          </li> 
@@ -136,7 +136,10 @@
                     <td><i class="fa fa-leaf"></i> Mode éco:</td>
                       <td>{{ecomode}}</td>
                   </tr>
-                    
+                <tr class="active">
+                    <td><i class="fa fa-road" aria-hidden="true"></i> Km / Nb points :</td>
+                    <td>{{km_tonte}}</td>
+                </tr>                    
                 </tbody>
               </table>
             </div>
@@ -162,25 +165,14 @@
             </div>
         </div>
         
-        <div class="tab-pane fade" role=tabpanel id=stats aria-labelledby=stats-tab> 
-            <div class="table-responsive">
-                <table class="table">
-                    <tbody>
-                        <tr class="active">
-                            <td>KM parcourus / Nb points :</td>
-                            <td>{{km_tonte}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-         
+        
         <div class="tab-pane fade" role=tabpanel id=version aria-labelledby=version-tab> 
             <div class="table-responsive">
                 <table class="table">
                     <tbody>
                         <tr class="active">
-                            <td>Version 0.3</td>
+                            <td><i class="fa fa-question-circle" aria-hidden="true"></i> Version</td>
+                            <td>{{>version}}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -218,13 +210,13 @@
     <div id="block_container">  
         <div class="row">
             <div id="block_zone">
-            <div id="divlabel"><label>Zone de Protection virtuelle</label></div>
-            <div id="divonnoff">
-                <div class="onoffswitch">
-                    <input type="checkbox" name="onoffswitchZ" class="onoffswitch-checkbox" id="myonoffswitchZ" >
-                    <label class="onoffswitch-label" for="myonoffswitchZ"></label>
+                <div id="divlabel"><label>Zone de Protection virtuelle</label></div>
+                <div id="divonnoff">
+                    <div class="onoffswitch">
+                        <input type="checkbox" name="onoffswitchZ" class="onoffswitch-checkbox" id="myonoffswitchZ" >
+                        <label class="onoffswitch-label" for="myonoffswitchZ"></label>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -244,4 +236,8 @@
     
     
     <div id="map-canvas2" class="map-canvas"></div>
+</template>
+
+<template name="version">
+    0.4.a
 </template>

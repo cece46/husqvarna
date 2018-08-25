@@ -1,9 +1,20 @@
 /* CSS declarations go here */
 .map-canvas {
-    width: 97%;
-    height:570px;
+    width: 98vh;
+    height:98vh;
+    max-height: 94vh;
     left:15px;
 }
+
+
+
+.el_map {
+    max-width: 98vh;
+    height:5vh;
+    max-height: 93vh;
+/*    background-color: aqua;*/
+}
+
 
 /*
 #address {
@@ -49,9 +60,10 @@
 
 .list-container {
     overflow-y: scroll;
-    max-height: 500px
-
+    height: 97vh;
+    max-height: 93vh;
 }
+
 
 
 .progress {
@@ -72,7 +84,7 @@
 .el_status:nth-child(1)
 {
     order: 1;
-    flex-basis: 25%;
+    flex-basis: 28%;
     -webkit-flex-direction: column;
     -moz-flex-direction: column;
     -ms-flex-direction: column;
@@ -83,12 +95,17 @@
 {
     order: 2;
     flex:1;
+    -webkit-flex-direction: column;
+    -moz-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
 }
 
 #block_container, #block_zone, #block_course, #block_space
 {
     display: flex;
     padding: 0;
+    max-width: 99vh;
     margin: 4px;
     list-style: none;
     display: -webkit-flex;
@@ -98,7 +115,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+/*    background-color: brown;*/
 }
 
 
@@ -137,3 +154,17 @@
 .onoffswitch-checkbox:checked + .onoffswitch-label:before {
     right: 0px; 
 }
+
+
+
+@media (max-width: 1024px) {
+    
+ 
+    .el_status:nth-child(1)
+    {
+            flex-basis: 50%;
+
+    }
+
+}
+

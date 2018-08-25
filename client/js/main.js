@@ -48,9 +48,11 @@ if (Meteor.isClient) {
         'isLogged' : function(){
             
             Session.set('expireToken',(parseInt(Date.now())+parseInt(Session.get('expiredToken'))));
-                    
+
             if ( parseInt(Date.now()) >  parseInt(Session.get('expireToken')))
+            {
                 Session.set('LOGIN',false)
+            }  
             
             return Session.get('LOGIN')
         }
@@ -114,6 +116,13 @@ if (Meteor.isClient) {
     Template.robot_status.helpers({
          
         'isLogged' : function(){
+            if (Session.get('LOGIN'))
+            {
+                $('body').css('background-image', 'none');
+            }else{
+                $('body').css('background-image', 'url(http://www.robot-tondeuse.info/wp-content/uploads/2016/06/Automower-420-2-1024x768.jpg)');
+                $('body').css('background-size', 'cover');
+            }
             return Session.get('LOGIN')
         },
         
@@ -437,7 +446,7 @@ if (Meteor.isClient) {
                 distance+=parseFloat(distanceFrom(path[i],path[i+1]))
 
             }
-            return distance.toFixed(3)+' km /'+(myrobot.status.lastLocations).length
+            return distance.toFixed(3)+' km / '+(myrobot.status.lastLocations).length+ " derniers points"
         }
         
     });
@@ -697,7 +706,8 @@ if (Meteor.isClient) {
       
         });
         
-        $(".list-container").css("max-height",$(".map-canvas").height()+'px')
+//        $(".list-container").css("max-height",$(".map-canvas").height()+'px')
+
 
 
     };

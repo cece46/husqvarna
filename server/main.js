@@ -11,7 +11,7 @@ Meteor.startup(() => {
          
          Get_Token : function(_user,_pass){
             
-            console.log("GET TOKEN")
+            //console.log("GET TOKEN")
             
             var token={}
             HTTP.post(URL_TOKEN, {
@@ -70,7 +70,7 @@ Meteor.startup(() => {
                 if ( error ) {
                     console.log( error );
                 } else {
-                    console.log(response.data[0]);
+                    //console.log(response.data[0]);
                     robot=response.data[0];
                 }
              });
@@ -117,7 +117,7 @@ Meteor.startup(() => {
                 Meteor._sleepForMs(100); 
                 timeout =timeout+ 100;
                 if (timeout==15000){
-                    console.log("timeout")
+                    //console.log("timeout")
                     break;
                 }
              }
@@ -145,7 +145,7 @@ Meteor.startup(() => {
                 Meteor._sleepForMs(100); 
                 timeout =timeout+ 100;
                 if (timeout==15000){
-                    console.log("timeout")
+                    //console.log("timeout")
                     break;
                 }
              }
@@ -172,7 +172,7 @@ Meteor.startup(() => {
                 Meteor._sleepForMs(100); 
                 timeout =timeout+ 100;
                 if (timeout==15000){
-                    console.log("timeout")
+                    //console.log("timeout")
                     break;
                 }
              }
